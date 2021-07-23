@@ -16,6 +16,7 @@
 		}
 		else {
 			try {
+        mysqli_report(MYSQLI_REPORT_ERROR);
 				$lgsl_database = mysqli_connect($mysql_server, $mysql_user, $mysql_password);
 
 				if (!$lgsl_database) {
@@ -36,7 +37,7 @@
 							`disabled`   TINYINT (1)   NOT NULL DEFAULT '0',
 							`comment`    VARCHAR (255) NOT NULL DEFAULT '',
 							`status`     TINYINT (1)   NOT NULL DEFAULT '0',
-							`cache`      TEXT          NOT NULL,
+							`cache`      MEDIUMTEXT    NOT NULL,
 							`cache_time` TEXT          NOT NULL,
 
 							PRIMARY KEY (`id`)
@@ -56,17 +57,35 @@
 			}
 		}
 	}
-	if(isset($_GET['test_udp'])){
-		$fp = fsockopen("udp://127.0.0.1", 13, $errno, $errstr, 3);
-		if (!$fp) {
-			echo "ERROR: $errno - $errstr<br />\n";
-			echo "<l k='coutd'></l>\n";
-		} else {
-			fwrite($fp, "\n");
-			echo fread($fp, 26);
-			echo "<l k='consu'></l>";
-			fclose($fp);
-		}
+	if(isset($_GET['test'])){
+    if(function_exists("fsockopen")){
+      $fp = fsockopen("udp://127.0.0.1", 13, $errno, $errstr, 3);
+      if (!$fp) {
+        echo "ERROR: $errno - $errstr<br />\n";
+        echo "<l k='coutd'></l>\n";
+      } else {
+        fwrite($fp, "\n");
+        echo "<l k='consu'></l>\n";
+        fclose($fp);
+      } 
+    }
+    else {
+      echo("FSOCKOPEN: FAILED\n");
+    }
+    
+    if(function_exists("curl_init") && function_exists("curl_setopt") && function_exists("curl_exec")){
+      echo("CURL: SUCCESS\n");
+    }
+    else{
+      echo("CURL: FAILED\n");
+    }
+    
+    if(function_exists("bzdecompress")){
+      echo("BZ2: SUCCESS\n");
+    }
+    else{
+      echo("BZ2: FAILED\n");
+    }
 	}
 
 ?>
@@ -130,7 +149,7 @@
 //------------------------------------------------------------------------------------------------------------+
 
 	$output = '
-	<h6><a href="./"><l k="back"></l></a> | <a href="?test_udp">Test UDP</a></h6>
+	<h6><a href="./"><l k="back"></l></a> | <a href="?test">Check requirements</a></h6>
 	<h5><a href="https://github.com/tltneon/lgsl/wiki/How-to-install-LGSL" target="_blank"><l k="owiki"></l></a></h5>
 	<h4><l k="step1"></l></h4>
 	<form method="post" action="?">
@@ -204,14 +223,18 @@
 			<option value="bulgarian">български</option>
 			<option value="slovak">Slovenčina</option>
 			<option value="arabic">اَلْعَرَبِيَّةُ</option>
-			<option value="help">>> Help to translate</option>
+			<option value="turkish">Türkçe</option>
+			<option value="korean">한국어</option>
+			<option value="help" style="color: green;">!Help to translate LGSL!</option>
 		</select>
 	</p>
 
 	<p>
-		<l k="selsc"></l>:
+		<l k="selsc"></l> <a href="https://github.com/tltneon/lgsl/wiki/scripts" target="_blank" class="hinfolink">?</a>:
 		<br /><input type="checkbox" id="parallax.js" name="scripts" onChange="changeCheckbox(event)" /> parallax (for Parallax Style)
 		<br /><input type="checkbox" id="preview.js" name="scripts" onChange="changeCheckbox(event)" /> map preview (on server list)
+		<br /><input type="checkbox" id="refresh.js" name="scripts" onChange="changeCheckbox(event)" /> refresh (manually refresh server status)
+		<br /><input type="checkbox" id="flag-icon.js" name="scripts" onChange="changeCheckbox(event)" /> flag-icon (replacing with svg)
 	</p>
 
 	<hr />
@@ -239,9 +262,21 @@
 		<input type="checkbox" name="image_mod" onChange="changeCheckbox(event)" />
 	</p>
 	<p>
-		Enable Pagination <a href="https://github.com/tltneon/lgsl/wiki" target="_blank" class="hinfolink">?</a>:
+		Enable Pagination <a href="https://github.com/tltneon/lgsl/wiki/features#pagination" target="_blank" class="hinfolink">?</a>:
 		<input type="checkbox" name="page_mod" onChange="changeCheckbox(event)" />
 		<input type="number" min="5" max="35" value="15" onChange="vars.page_lim = event.target.value" />
+	</p>
+	<p>
+		Automatically reload page:
+		<input type="checkbox" name="autoreload" onChange="changeCheckbox(event)" />
+	</p>
+	<p>
+		Time before a server needs updating:
+		<input type="number" min="0" max="3600" value="60" onChange="vars.cache_time = event.target.value" />
+	</p>
+	<p>
+		Enable server tracking (history) <a href="https://github.com/tltneon/lgsl/wiki/features#pagination" target="_blank" class="hinfolink">?</a>:
+		<input type="checkbox" name="history" onChange="changeCheckbox(event)" />
 	</p>
 	<p>
 		<l k="hideo"></l>:
@@ -316,6 +351,9 @@ document.addEventListener("reloadLocale", reloadLocale);
 		image_mod: false,
 		page_mod: false,
 		page_lim: 15,
+		autoreload: false,
+		history: false,
+		cache_time: 60,
 		hide_offline: false,
 		public_add: false,
 		totals: false,
@@ -434,7 +472,9 @@ document.addEventListener("reloadLocale", reloadLocale);
 		"$lgsl_config['host_to_ip']    = 0;                     // 1=show the servers ip instead of its hostname \n" +
 		"$lgsl_config['public_add']    = "+ vars.public_add +"; // 1=servers require approval OR 2=servers shown instantly \n" +
 		"$lgsl_config['public_feed']   = 0;                     // 1=feed requests can add new servers to your list \n" +
-		"$lgsl_config['cache_time']    = 60;                    // seconds=time before a server needs updating \n" +
+		"$lgsl_config['cache_time']    = "+ vars.cache_time +"; // seconds=time before a server needs updating \n" +
+		"$lgsl_config['autoreload']    = "+ vars.autoreload +"; // 1=reloads page when cache_time is passed \n" +
+		"$lgsl_config['history']       = "+ vars.history +";    // 1=reloads page when cache_time is passed \n" +
 		"$lgsl_config['live_time']     = 3;                     // seconds=time allowed for updating servers per page load \n" +
 		"$lgsl_config['timeout']       = 0;                     // 1=gives more time for servers to respond but adds loading delay \n" +
 		"$lgsl_config['retry_offline'] = 0;                     // 1=repeats query when there is no response but adds loading delay \n" +
@@ -470,7 +510,7 @@ document.addEventListener("reloadLocale", reloadLocale);
 				"owiki": "Online Wiki: How to",
 				"gener": "Generate config",
 				"creat": "Create table",
-				"filla": "You need to fill required* inputs (step 2).",
+				"filla": "You need to fill required* inputs (step 1 or 2).",
 				"mysld": "Connect <span style='color: red;'>failed</span>: mysqli extension doesn't active.",
 				"table": "LGSL <span style='color: red;'>table wasn't created</span>: wrong database name or table already exists.",
 				"cretd": "Table <span style='color: green;'>successfully</span> created! Get to Step 2.",
@@ -498,7 +538,7 @@ document.addEventListener("reloadLocale", reloadLocale);
 				"owiki": "Online Wiki: How to",
 				"gener": "Generate config",
 				"creat": "Create table",
-				"filla": "You need to fill required* inputs (step 2).",
+				"filla": "You need to fill required* inputs (step 1 or 2).",
 				"mysld": "Connect <span style='color: red;'>failed</span>: mysqli extension doesn't active.",
 				"table": "LGSL <span style='color: red;'>table wasn't created</span>: wrong database name or table already exists.",
 				"cretd": "Table <span style='color: green;'>successfully</span> created! Get to Step 2.",
@@ -526,7 +566,7 @@ document.addEventListener("reloadLocale", reloadLocale);
 				"owiki": "Online Wiki: How to",
 				"gener": "Generate config",
 				"creat": "Create table",
-				"filla": "You need to fill required* inputs (step 2).",
+				"filla": "You need to fill required* inputs (step 1 or 2).",
 				"mysld": "Connect <span style='color: red;'>failed</span>: mysqli extension doesn't active.",
 				"table": "LGSL <span style='color: red;'>table wasn't created</span>: wrong database name or table already exists.",
 				"cretd": "Table <span style='color: green;'>successfully</span> created! Get to Step 2.",
@@ -554,7 +594,7 @@ document.addEventListener("reloadLocale", reloadLocale);
 				"owiki": "Online Wiki: How to",
 				"gener": "Generate config",
 				"creat": "Create table",
-				"filla": "You need to fill required* inputs (step 2).",
+				"filla": "You need to fill required* inputs (step 1 or 2).",
 				"mysld": "Connect <span style='color: red;'>failed</span>: mysqli extension doesn't active.",
 				"table": "LGSL <span style='color: red;'>table wasn't created</span>: wrong database name or table already exists.",
 				"cretd": "Table <span style='color: green;'>successfully</span> created! Get to Step 2.",
@@ -582,7 +622,7 @@ document.addEventListener("reloadLocale", reloadLocale);
 				"owiki": "Online Wiki: How to",
 				"gener": "Generate config",
 				"creat": "Create table",
-				"filla": "You need to fill required* inputs (step 2).",
+				"filla": "You need to fill required* inputs (step 1 or 2).",
 				"mysld": "Connect <span style='color: red;'>failed</span>: mysqli extension doesn't active.",
 				"table": "LGSL <span style='color: red;'>table wasn't created</span>: wrong database name or table already exists.",
 				"cretd": "Table <span style='color: green;'>successfully</span> created! Get to Step 2.",
@@ -610,7 +650,7 @@ document.addEventListener("reloadLocale", reloadLocale);
 				"owiki": "Online Wiki: How to",
 				"gener": "Generate config",
 				"creat": "Create table",
-				"filla": "You need to fill required* inputs (step 2).",
+				"filla": "You need to fill required* inputs (step 1 or 2).",
 				"mysld": "Connect <span style='color: red;'>failed</span>: mysqli extension doesn't active.",
 				"table": "LGSL <span style='color: red;'>table wasn't created</span>: wrong database name or table already exists.",
 				"cretd": "Table <span style='color: green;'>successfully</span> created! Get to Step 2.",
@@ -638,7 +678,7 @@ document.addEventListener("reloadLocale", reloadLocale);
 				"owiki": "Online Wiki: How to",
 				"gener": "Generate config",
 				"creat": "Create table",
-				"filla": "You need to fill required* inputs (step 2).",
+				"filla": "You need to fill required* inputs (step 1 or 2).",
 				"mysld": "Connect <span style='color: red;'>failed</span>: mysqli extension doesn't active.",
 				"table": "LGSL <span style='color: red;'>table wasn't created</span>: wrong database name or table already exists.",
 				"cretd": "Table <span style='color: green;'>successfully</span> created! Get to Step 2.",
@@ -666,7 +706,7 @@ document.addEventListener("reloadLocale", reloadLocale);
 				"owiki": "Online Wiki: Ako na to",
 				"gener": "Vytvoriť konfiguráciu",
 				"creat": "Vytvoriť tabuľky",
-				"filla": "Musíš vyplniť povinné* údaje (krok 2).",
+				"filla": "Musíš vyplniť povinné* údaje (krok 1 or 2).",
 				"mysld": "Pripojenie <span style='color: red;'>Zlyhalo</span>: PHP rozšírenie mysqli nie je aktívne.",
 				"table": "LGSL <span style='color: red;'>tabulka nebola vytvorená</span>: nesprávny názov databázy alebo tabuľka už existuje.",
 				"cretd": "Table <span style='color: green;'>successfully</span> created! Get to Step 2.",
@@ -694,10 +734,66 @@ document.addEventListener("reloadLocale", reloadLocale);
 				"owiki": "Online Wiki: How to",
 				"gener": "Generate config",
 				"creat": "Create table",
-				"filla": "You need to fill required* inputs (step 2).",
+				"filla": "You need to fill required* inputs (step 1 or 2).",
 				"mysld": "Connect <span style='color: red;'>failed</span>: mysqli extension doesn't active.",
 				"table": "LGSL <span style='color: red;'>table wasn't created</span>: wrong database name or table already exists.",
 				"cretd": "Table <span style='color: green;'>successfully</span> created! Get to Step 2.",
+			},
+			"turkish": {
+				"tablc": "LGSL tablosu oluşturuldu <span style='color: green;'>Başarıyla Tamamlandı!</span>.",
+				"filli": "Girişleri doldurmanız gerekiyor (<span style='color:red'>1'inci Adımı</span>) Kontrol Ediniz.",
+				"consu": "Bağlantı <span style='color: green;'>Başarıyla</span> kuruldu, LGSL oyun sunucularından veri alabilir.",
+				"coutd": "LGSL <span style='color: red;'>Barındırma işleminizde UDP yukarı akışı engellendiğinden</span> oyun sunucularının çoğundan veri alınamadı.",
+				"remem": "LGSL'yi kurduktan sonra install.php'yi kaldırmayı unutmayın!",
+				"after": "Yapılandırmayı yaptıktan sonra, onu lgsl_files/lgsl_config.php olarak değiştirin",
+				"selst": "Stil seçin",
+				"sella": "Dilinizi Seçin",
+				"selsc": "Script'leri Seçin",
+				"sorts": "Sunucuya Göre Sırala",
+				"sortp": "Oyuncuya Göre Sırala",
+				"enaim": "Görüntü modunu etkinleştir",
+				"hideo": "Çevrimdışı sunucuları gizle",
+				"pubad": "Özel Sunucu Ekle",
+				"showt": "Toplamları göster",
+				"showl": "Konumları göster",
+				"step1": "Adım 1: LGSL Tablolarını Kurun",
+				"step2": "2. Adım: LGSL'yi Yapılandırma",
+				"back": "< Geri Git",
+				"owiki": "Çevrimiçi Wiki: Nasıl Yapılır?",
+				"gener": "Yapılandırma oluştur",
+				"creat": "Tablo oluştur",
+				"filla": "Gerekli* girişleri doldurmanız gerekir (adım 1 veya 2).",
+				"mysld": "Bağlantı <span style='color: red;'>failed</span>: Hatalı <span style='color: red;'>Bağlantı Başarısız</span>: mysqli uzantısı etkin değil.",
+				"table": "LGSL <span style='color: red;'>tablo oluşturulmadı</span>: yanlış veritabanı adı veya tablo zaten var.",
+				"cretd": "Tablo <span style='color: green;'>Başarıyla Oluşturuldu!</span> Oluşturuldu! 2'inci adıma geçin",
+			},
+			"korean": {
+				"tablc": "LGSL 테이블이<span style='color: green;'>완료되었습니다!</span>를 만들었습니다.",
+				"filli": "항목을 채워야 합니다(<span style='color:red'>1단계</span>). 확인해야 합니다.",
+				"consu": "연결 <span style='color: green;'>성공적으로 설정</span>, LGSL 게임 서버에서 데이터를 받을 수 있습니다.",
+				"coutd": "LGSL <span style='color: red;'>UDP 업스트림이 호스팅에서 차단되었기 때문입니다</span>. 대부분의 게임 서버에서 데이터를 검색하지 못했습니다.",
+				"remem": "LGSL을 설치한 후 install.php를 제거하는 것을 잊지 마십시오!",
+				"after": "설정 후 lgsl_files/lgsl_config.php로 변경",
+				"selst": "테마 선택",
+				"sella": "당신의 언어를 고르시 오",
+				"selsc": "플러그인 선택",
+				"sorts": "서버별 정렬",
+				"sortp": "플레이어별로 정렬",
+				"enaim": "디스플레이 모드 활성화",
+				"hideo": "오프라인 서버 숨기기",
+				"pubad": "사설 서버 추가",
+				"showt": "총계 미리보기",
+				"showl": "위치를 표시합니다.",
+				"step1": "1단계: LGSL 테이블 설치",
+				"step2": "2단계: LGSL 구성",
+				"back": "< 돌아가기",
+				"owiki": "온라인 위키: 방법 배우다",
+				"gener": "구성 만들기",
+				"creat": "테이블 생성",
+				"filla": "필수* 항목을 입력해야 합니다(1단계 또는 2단계).",
+				"mysld": "링크 <span style='color: red;'>실패</span>: 잘못된 <span style='color: red;'>연결 실패</span>: mysqli 확장이 활성화되어 있지 않습니다.",
+				"table": "LGSL <span style='color: red;'>테이블이 생성되지 않음</span>: 잘못된 데이터베이스 이름 또는 테이블이 이미 존재합니다.",
+				"cretd": "<span style='color: green;'>성공적으로 생성되었습니다!</span> 테이블이 생성되었습니다! 2단계로 이동",
 			},
 		}
 		return t[locale][key];

@@ -32,7 +32,7 @@
     exit("LGSL FEED PROBLEM: INCOMPLETE REQUEST");
   }
 
-  if ($q_port > 99999 || $q_port < 1024)
+  if ($q_port > 99999 || $q_port < 1)
   {
     exit("LGSL FEED PROBLEM: INVALID QUERY PORT: '{$q_port}'");
   }
@@ -78,7 +78,7 @@
 //------------------------------------------------------------------------------------------------------------+
 // ADD THE FEED PROVIDER
 
-  if ($server['e']) { $server['e']['_feed_'] = "http://{$_SERVER['HTTP_HOST']}"; }
+  if (isset($server['e'])) { $server['e']['_feed_'] = "http://{$_SERVER['HTTP_HOST']}"; }
 
 //------------------------------------------------------------------------------------------------------------+
 // FEED USAGE LOGGING - 'logs' FOLDER MUST BE MANUALLY CREATED AND SET AS WRITABLE

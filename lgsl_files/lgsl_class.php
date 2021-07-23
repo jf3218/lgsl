@@ -200,6 +200,7 @@
       $cache['s']['playersmax'] = 0;
       $cache['s']['password']   = 0;
       $cache['s']['cache_time'] = $cache_time[0] == '' ? 0 : $cache_time[0];
+      $cache['s']['history']    = array();
     }
 
     if (!isset($cache['e'])) { $cache['e'] = array(); }
@@ -248,9 +249,30 @@
         $live['s']['password']   = $cache['s']['password'];
         $live['s']['players']    = 0;
         $live['s']['playersmax'] = $cache['s']['playersmax'];
-        $live['s']['cache_time'] = $cache['s']['cache_time'];
+        $live['s']['cache_time'] = time();
         $live['e']               = array();
         $live['p']               = array();
+      }
+
+      // WRITING STATS
+
+      if($lgsl_config['history']) {
+        $live['s']['history']    = array();
+
+        if(isset($cache['s']['history'])){
+          foreach($cache['s']['history'] as $item){
+            if(time() - $item['time'] < 60 * 60 * 24) // NOT OLDER THAN 1 DAY
+              array_push($live['s']['history'], $item);
+          }
+        }
+        $last = ($cache['s']['history'] ? end($cache['s']['history']) : null);
+        if(!$last or time() - $last['time'] >= 60 * 15 ) { // RECORD IF 15 MINS IS PASSED
+          array_push($live['s']['history'], array(
+            "status"  => (int) $live['b']['status'],
+            "time"    => $live['s']['cache_time'],
+            "players" => (int) $live['s']['players']
+          ));
+        }
       }
 
       // MERGE LIVE INTO CACHE
@@ -454,6 +476,7 @@
 
     $misc['icon_details']       = $lgsl_url_path."other/icon_details.gif";
     $misc['icon_game']          = lgsl_icon_game($server['b']['type'], $server['s']['game']);
+    $misc['status']             = lgsl_server_status($server['b']['status'], $server['s']['password'], $server['b']['pending']);
     $misc['icon_status']        = lgsl_icon_status($server['b']['status'], $server['s']['password'], $server['b']['pending']);
     $misc['icon_location']      = lgsl_icon_location($server['o']['location']);
     $misc['image_map']          = lgsl_image_map($server['b']['status'], $server['b']['type'], $server['s']['game'], $server['s']['map'], TRUE, $server['o']['id']);
@@ -490,6 +513,17 @@
     }
 
     return "{$lgsl_url_path}other/icon_unknown.gif";
+  }
+
+//------------------------------------------------------------------------------------------------------------+
+
+  function lgsl_server_status($status, $password, $pending = 0)
+  {
+    if ($pending)  { return "pending"; }
+    if (!$status)  { return "no_response"; }
+    if ($password) { return "online_password"; }
+
+    return "online";
   }
 
 //------------------------------------------------------------------------------------------------------------+
@@ -728,7 +762,7 @@
   {
     global $lgsl_config;
 
-    if (!is_array($server['p'])) { return $server; }
+    if (!isset($server['p']) or !is_array($server['p'])) { return $server; }
 
     if     ($lgsl_config['sort']['players'] == "name")  { usort($server['p'], "lgsl_sort_players_by_name");  }
     elseif ($lgsl_config['sort']['players'] == "score") { usort($server['p'], "lgsl_sort_players_by_score"); }
@@ -750,9 +784,12 @@
 
   function lgsl_sort_players_by_time($player_a, $player_b)
   {
-    if ($player_a['time'] == $player_b['time']) { return 0; }
+    if((isset($player_a['time']))&&(isset($player_b['time'])))
+    {
+      if ($player_a['time'] == $player_b['time']) { return 0; }
 
-    return ($player_a['time'] < $player_b['time']) ? 1 : -1;
+      return ($player_a['time'] < $player_b['time']) ? 1 : -1;
+    }
   }
 
 //------------------------------------------------------------------------------------------------------------+
@@ -925,7 +962,7 @@
 
       $answer = curl_exec($lgsl_curl);
       $answer = json_decode($answer, true);
-      $location = $answer["countryCode"];
+      $location = (isset($answer["countryCode"]) ? $answer["countryCode"] : "XX");
 
       if (curl_error($lgsl_curl)) { $location = "XX"; }
 
@@ -1046,34 +1083,32 @@
 
   $auth   = md5($_SERVER['REMOTE_ADDR'].md5($lgsl_config['admin']['user'].md5($lgsl_config['admin']['pass'])));
   $cookie = isset($_COOKIE['lgsl_admin_auth']) ? $_COOKIE['lgsl_admin_auth'] : "";
-
-  if (isset($_GET['lgsl_debug']) and $auth == $cookie)
-  {
-    echo "<hr /><pre>".print_r($_SERVER, TRUE)."</pre>
-          <hr />#d0# ".__FILE__."
-          <hr />#d1# ".@realpath(__FILE__)."
-          <hr />#d2# ".dirname(__FILE__)."
-          <hr />#d3# {$lgsl_file_path}
-          <hr />#d4# {$_SERVER['DOCUMENT_ROOT']}
-          <hr />#d5# ".@realpath($_SERVER['DOCUMENT_ROOT']);
-  }
-
-
   $lgsl_url_path = lgsl_url_path();
 
   if (isset($_GET['lgsl_debug']) and $auth == $cookie)
   {
-    echo "<hr />#d6# {$lgsl_url_path}
-          <hr />#c0# {$lgsl_config['url_path']}
-          <hr />#c1# {$lgsl_config['no_realpath']}
-          <hr />#c2# {$lgsl_config['feed']['method']}
-          <hr />#c3# {$lgsl_config['feed']['url']}
-          <hr />#c4# {$lgsl_config['cache_time']}
-          <hr />#c5# {$lgsl_config['live_time']}
-          <hr />#c6# {$lgsl_config['timeout']}
-          <hr />#c7# {$lgsl_config['cms']}
-          <hr />";
-    echo "
+    echo "<details>
+            <summary style='margin-bottom: 12px;'>
+              Open debug infos
+            </summary>
+            <hr /><pre>".print_r($_SERVER, TRUE)."</pre>
+            <hr />#d0# ".__FILE__."
+            <hr />#d1# ".@realpath(__FILE__)."
+            <hr />#d2# ".dirname(__FILE__)."
+            <hr />#d3# {$lgsl_file_path}
+            <hr />#d4# {$_SERVER['DOCUMENT_ROOT']}
+            <hr />#d5# ".@realpath($_SERVER['DOCUMENT_ROOT'])."
+            <hr />#d6# {$lgsl_url_path}
+            <hr />#c0# {$lgsl_config['url_path']}
+            <hr />#c1# {$lgsl_config['no_realpath']}
+            <hr />#c2# {$lgsl_config['feed']['method']}
+            <hr />#c3# {$lgsl_config['feed']['url']}
+            <hr />#c4# {$lgsl_config['cache_time']}
+            <hr />#c5# {$lgsl_config['live_time']}
+            <hr />#c6# {$lgsl_config['timeout']}
+            <hr />#c7# {$lgsl_config['cms']}
+            <hr />
+          </details>
           <select onchange='javascript:document.querySelector(\"link[rel=stylesheet]\").href = \"lgsl_files/styles/\" + this.value + \".css\"'>
             <option value='breeze_style'>breeze_style</option>
             <option value='classic_style'>classic_style</option>

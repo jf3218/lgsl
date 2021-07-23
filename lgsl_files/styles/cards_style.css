@@ -25,6 +25,7 @@ a:active { color:#8298b9;}
 #topmenu > li:before { content: '► '; }
 
 /* add */
+.addserver_table { margin: auto; }
 .annotation { text-align: center; background-color: #feffff; border: 1px solid #e5fbff; padding-top:17px; padding-bottom:17px; }
 
 /* details */
@@ -136,8 +137,8 @@ div.servername_nolink { display: none; }
 .details_cell {  }
 .details_cell > a { text-decoration: none; }
 
-#pages { width: fit-content; margin: auto; margin-top: 16px; }
-#pages a { padding: 7px; background-color: #feffff; border-radius: 6px; border: 1px solid #c2d1d4; }
+#pages { width: fit-content; margin: 2.6em auto; font-size: 1.12em; }
+#pages a { padding: 7px; background-color: #feffff; border-radius: 6px; border: 1px solid #c2d1d4; font-size: 1.3em; }
 #pages span { padding: 10px; }
 
 #totals { width: fit-content; background-color: #f4f7fa; margin:auto; margin-top: 20px; }
@@ -191,8 +192,8 @@ input[type='text']:focus, input[type='number']:focus, input[type='password']:foc
 		margin: 0;
 	}
 	#topmenu > li {
-	    display: inline-block;
-	    padding: 10px 0px;
+    display: inline-block;
+    padding: 10px 0px;
 	}
 	#server_list_table { width:100%; margin: 0px; }
 	.players_cell { border-radius: 0px 12px 12px 0px !important; }
@@ -202,7 +203,7 @@ input[type='text']:focus, input[type='number']:focus, input[type='password']:foc
 	.map_cell,
 	div.servername_nolink,
 	.status_icon_nrs, .status_icon_onl, .status_icon_onp {
-			display: none;
+    display: none;
 	}
 	.servername_cell { padding: 0px; }
 	.servername_cell > .servername_link {
@@ -227,7 +228,6 @@ input[type='text']:focus, input[type='number']:focus, input[type='password']:foc
 	#server_list_table tr.server_nrs {
     background-color: #d0d0d0;
 	}
-	#totals { margin: 0px; }
 	#totals > div {
 		border-radius: 8px 0px;
 		padding: 10px 1px;
