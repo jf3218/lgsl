@@ -2,7 +2,7 @@
 
  /*----------------------------------------------------------------------------------------------------------\
  |                                                                                                            |
- |                      [ LIVE GAME SERVER LIST ] [ © RICHARD PERRY FROM GREYCUBE.COM ]                       |
+ |                      [ LIVE GAME SERVER LIST ] [ Â© RICHARD PERRY FROM GREYCUBE.COM ]                       |
  |                                                                                                            |
  |    Released under the terms and conditions of the GNU General Public License Version 3 (http://gnu.org)    |
  |                                                                                                            |
@@ -16,7 +16,7 @@
 //------------------------------------------------------------------------------------------------------------+
 //------------------------------------------------------------------------------------------------------------+
 
-  function lgsl_link($s = "")
+  function lgsl_link($s = "", $p = "")
   {
     global $lgsl_config, $lgsl_url_path;
 
@@ -41,7 +41,11 @@
       break;
 
       default: // "sa"
-        $link = $s ? $lgsl_url_path."../{$index}?s={$s}" : $lgsl_url_path."../{$index}";
+        $link = $s ?
+                  $p ?
+                    "{$lgsl_url_path}../{$index}?ip={$s}&port={$p}" :
+                    "{$lgsl_url_path}../{$index}?s={$s}" :
+                    "{$lgsl_url_path}../{$index}";
       break;
     }
 
@@ -120,32 +124,27 @@
 
     // LOOKUP SERVER
 
-    if ($id != NULL)
-    {
-      $id           = intval($id);
+    if ($id != NULL) {
+      $id            = intval($id);
       $mysqli_query  = "SELECT * FROM `{$lgsl_config['db']['prefix']}{$lgsl_config['db']['table']}` WHERE `id`='{$id}' LIMIT 1";
-      $mysqli_result = mysqli_query($lgsl_database, $mysqli_query) or die(mysqli_error($lgsl_database));
-      $mysqli_row    = mysqli_fetch_array($mysqli_result, MYSQLI_ASSOC);
-      if (!$mysqli_row) { return FALSE; }
-      list($type, $ip, $c_port, $q_port, $s_port) = array($mysqli_row['type'], $mysqli_row['ip'], $mysqli_row['c_port'], $mysqli_row['q_port'], $mysqli_row['s_port']);
-    }
-    else
-    {
+    } else if ($ip != "" && $c_port != "" && ($type == "" || $q_port == "")) {
+      list($ip, $c_port) = array(mysqli_real_escape_string($lgsl_database, $ip), intval($c_port));
+      $mysqli_query  = "SELECT * FROM `{$lgsl_config['db']['prefix']}{$lgsl_config['db']['table']}` WHERE `ip`='{$ip}' AND `c_port`='{$c_port}' LIMIT 1";
+    } else {
       list($type, $ip, $c_port, $q_port, $s_port) = array(mysqli_real_escape_string($lgsl_database, $type), mysqli_real_escape_string($lgsl_database, $ip), intval($c_port), intval($q_port), intval($s_port));
-
       if (!$type || !$ip || !$c_port || !$q_port) { exit("LGSL PROBLEM: INVALID SERVER '{$type} : {$ip} : {$c_port} : {$q_port} : {$s_port}'"); }
       $mysqli_query  = "SELECT * FROM `{$lgsl_config['db']['prefix']}{$lgsl_config['db']['table']}` WHERE `type`='{$type}' AND `ip`='{$ip}' AND `q_port`='{$q_port}' LIMIT 1";
-      $mysqli_result = mysqli_query($lgsl_database, $mysqli_query) or die(mysqli_error($lgsl_database));
-      $mysqli_row    = mysqli_fetch_array($mysqli_result, MYSQLI_ASSOC);
-
-      if (!$mysqli_row)
-      {
-        if (strpos($request, "a") === FALSE) { exit("LGSL PROBLEM: SERVER NOT IN DATABASE '{$type} : {$ip} : {$c_port} : {$q_port} : {$s_port}'"); }
-        $mysqli_query  = "INSERT INTO `{$lgsl_config['db']['prefix']}{$lgsl_config['db']['table']}` (`type`,`ip`,`c_port`,`q_port`,`s_port`,`cache`,`cache_time`) VALUES ('{$type}','{$ip}','{$c_port}','{$q_port}','{$s_port}','','')";
-        $mysqli_result = mysqli_query($lgsl_database, $mysqli_query) or die(mysqli_error($lgsl_database));
-        $mysqli_row    = array("id"=>mysqli_insert_id(), "zone"=>"0", "comment"=>"");
-      }
     }
+
+    $mysqli_result = mysqli_query($lgsl_database, $mysqli_query) or die(mysqli_error($lgsl_database));
+    $mysqli_row    = mysqli_fetch_array($mysqli_result, MYSQLI_ASSOC);
+    if (!$mysqli_row) {
+      if (strpos($request, "a") === FALSE) { exit("LGSL PROBLEM: SERVER NOT IN DATABASE '{$type} : {$ip} : {$c_port} : {$q_port} : {$s_port}'"); }
+      $mysqli_query  = "INSERT INTO `{$lgsl_config['db']['prefix']}{$lgsl_config['db']['table']}` (`type`,`ip`,`c_port`,`q_port`,`s_port`,`cache`,`cache_time`) VALUES ('{$type}','{$ip}','{$c_port}','{$q_port}','{$s_port}','','')";
+      $mysqli_result = mysqli_query($lgsl_database, $mysqli_query) or die(mysqli_error($lgsl_database));
+      $mysqli_row    = array("id" => mysqli_insert_id(), "zone" => "0", "comment" => "");
+    }
+    list($type, $ip, $c_port, $q_port, $s_port) = array($mysqli_row['type'], $mysqli_row['ip'], $mysqli_row['c_port'], $mysqli_row['q_port'], $mysqli_row['s_port']);
 
     // UNPACK CACHE AND CACHE TIMES
 
@@ -250,7 +249,7 @@
         $live['s']['players']    = 0;
         $live['s']['playersmax'] = $cache['s']['playersmax'];
         $live['s']['cache_time'] = time();
-        $live['e']               = array();
+        $live['e']               = $live['e'] or array();
         $live['p']               = array();
       }
 
@@ -264,14 +263,14 @@
             if(time() - $item['time'] < 60 * 60 * 24) // NOT OLDER THAN 1 DAY
               array_push($live['s']['history'], $item);
           }
-        }
-        $last = ($cache['s']['history'] ? end($cache['s']['history']) : null);
-        if(!$last or time() - $last['time'] >= 60 * 15 ) { // RECORD IF 15 MINS IS PASSED
-          array_push($live['s']['history'], array(
-            "status"  => (int) $live['b']['status'],
-            "time"    => $live['s']['cache_time'],
-            "players" => (int) $live['s']['players']
-          ));
+         $last = ($cache['s']['history'] ? end($cache['s']['history']) : null);
+         if(!$last or time() - $last['time'] >= 60 * 15 ) { // RECORD IF 15 MINS IS PASSED
+           array_push($live['s']['history'], array(
+             "status"  => (int) $live['b']['status'],
+             "time"    => $live['s']['cache_time'],
+             "players" => (int) $live['s']['players']
+           ));
+         }
         }
       }
 
@@ -368,58 +367,6 @@
 
 //------------------------------------------------------------------------------------------------------------+
 
-  function lgsl_query_cached_all($request) // LEGACY - DO NOT USE
-  {
-    return lgsl_query_group( array( "request"=>$request ) );
-  }
-
-//------------------------------------------------------------------------------------------------------------+
-
-  function lgsl_query_cached_zone($request, $zone) // LEGACY - DO NOT USE
-  {
-    return lgsl_query_group( array( "request"=>$request, "zone"=>$zone ) );
-  }
-
-//------------------------------------------------------------------------------------------------------------+
-
-  function lgsl_cached_totals() // LEGACY - DO NOT USE
-  {
-    return lgsl_group_totals();
-  }
-
-//------------------------------------------------------------------------------------------------------------+
-
-  function lgsl_lookup_id($id) // LEGACY - DO NOT USE
-  {
-    global $lgsl_config, $lgsl_database;
-
-    lgsl_database();
-
-    $id           = mysqli_real_escape_string($lgsl_database, intval($id));
-    $mysqli_query  = "SELECT `type`,`ip`,`c_port`,`q_port`,`s_port` FROM `{$lgsl_config['db']['prefix']}{$lgsl_config['db']['table']}` WHERE `id`='{$id}' LIMIT 1";
-    $mysqli_result = mysqli_query($lgsl_database, $mysqli_query) or die(mysqli_error($lgsl_database));
-    $mysqli_row    = mysqli_fetch_array($mysqli_result, MYSQLI_ASSOC);
-
-    return $mysqli_row;
-  }
-
-  function lgsl_lookup_server($ip, $port) // LEGACY - DO NOT USE
-  {
-    global $lgsl_config, $lgsl_database;
-
-    lgsl_database();
-
-    $ip           = mysqli_real_escape_string($lgsl_database, $ip);
-    $port           = mysqli_real_escape_string($lgsl_database, intval($port));
-    $mysqli_query  = "SELECT `id` FROM `{$lgsl_config['db']['prefix']}{$lgsl_config['db']['table']}` WHERE `ip`='{$ip}' AND `c_port`='{$port}' LIMIT 1";
-    $mysqli_result = mysqli_query($lgsl_database, $mysqli_query) or die(mysqli_error($lgsl_database));
-    $mysqli_row    = mysqli_fetch_array($mysqli_result, MYSQLI_ASSOC);
-
-    return $mysqli_row['id'];
-  }
-
-//------------------------------------------------------------------------------------------------------------+
-
   function lgsl_timer($action)
   {
     global $lgsl_config;
@@ -476,7 +423,6 @@
 
     $misc['icon_details']       = $lgsl_url_path."other/icon_details.gif";
     $misc['icon_game']          = lgsl_icon_game($server['b']['type'], $server['s']['game']);
-    $misc['status']             = lgsl_server_status($server['b']['status'], $server['s']['password'], $server['b']['pending']);
     $misc['icon_status']        = lgsl_icon_status($server['b']['status'], $server['s']['password'], $server['b']['pending']);
     $misc['icon_location']      = lgsl_icon_location($server['o']['location']);
     $misc['image_map']          = lgsl_image_map($server['b']['status'], $server['b']['type'], $server['s']['game'], $server['s']['map'], TRUE, $server['o']['id']);
@@ -486,7 +432,7 @@
     $misc['text_location']      = lgsl_text_location($server['o']['location']);
     $misc['name_filtered']      = lgsl_string_html($server['s']['name'], FALSE, 20); // LEGACY
     $misc['connect_filtered']   = ($server['b']['type'] == "discord" ? "https://discord.gg/" . $server['b']['ip'] : $server['b']['ip'] . ":" . $server['b']['c_port'] );
-    $misc['software_link']      = lgsl_software_link($server['b']['type'], $server['b']['ip'], $server['b']['c_port'], $server['b']['q_port'], $server['b']['s_port']);
+    $misc['software_link']      = lgsl_software_link($server['b']['type'], $server['b']['ip'], $server['b']['c_port'], $server['b']['q_port'], $server['b']['s_port'], $server['s']['game']);
     $misc['location_link']      = lgsl_location_link($server['o']['location']);
 
     return $misc;
@@ -513,17 +459,6 @@
     }
 
     return "{$lgsl_url_path}other/icon_unknown.gif";
-  }
-
-//------------------------------------------------------------------------------------------------------------+
-
-  function lgsl_server_status($status, $password, $pending = 0)
-  {
-    if ($pending)  { return "pending"; }
-    if (!$status)  { return "no_response"; }
-    if ($password) { return "online_password"; }
-
-    return "online";
   }
 
 //------------------------------------------------------------------------------------------------------------+
@@ -612,7 +547,7 @@
   {
     global $lgsl_url_path;
 
-    if (!$password || !$status) { return "{$lgsl_url_path}other/map_overlay.gif"; }
+    if (!$password || !$status) { return "{$lgsl_url_path}other/overlay.gif"; }
 
     return "{$lgsl_url_path}other/map_overlay_password.gif";
   }
@@ -654,11 +589,15 @@
 
     if (!is_array($server_list)) { return $server_list; }
 
-    if     ($lgsl_config['sort']['servers'] == "id")      { usort($server_list, "lgsl_sort_servers_by_id");      }
-    elseif ($lgsl_config['sort']['servers'] == "zone")    { usort($server_list, "lgsl_sort_servers_by_zone");    }
-    elseif ($lgsl_config['sort']['servers'] == "type")    { usort($server_list, "lgsl_sort_servers_by_type");    }
-    elseif ($lgsl_config['sort']['servers'] == "status")  { usort($server_list, "lgsl_sort_servers_by_status");  }
-    elseif ($lgsl_config['sort']['servers'] == "players") { usort($server_list, "lgsl_sort_servers_by_players"); }
+    switch($lgsl_config['sort']['servers']){
+
+      case "id":      { usort($server_list, "lgsl_sort_servers_by_id");      break; }
+      case "zone":    { usort($server_list, "lgsl_sort_servers_by_zone");    break; }
+      case "type":    { usort($server_list, "lgsl_sort_servers_by_type");    break; }
+      case "status":  { usort($server_list, "lgsl_sort_servers_by_status");  break; }
+      case "players": { usort($server_list, "lgsl_sort_servers_by_players"); break; }
+
+    }
 
     return $server_list;
   }
@@ -747,7 +686,7 @@
 
 //------------------------------------------------------------------------------------------------------------+
 
-  function lgsl_sort_extras($server)
+  function lgsl_sort_extras(&$server)
   {
     if (!is_array($server['e'])) { return $server; }
 
@@ -766,7 +705,7 @@
 
     if     ($lgsl_config['sort']['players'] == "name")  { usort($server['p'], "lgsl_sort_players_by_name");  }
     elseif ($lgsl_config['sort']['players'] == "score") { usort($server['p'], "lgsl_sort_players_by_score"); }
-    elseif ($lgsl_config['sort']['players'] == "time") { usort($server['p'], "lgsl_sort_players_by_time"); }
+    elseif ($lgsl_config['sort']['players'] == "time")  { usort($server['p'], "lgsl_sort_players_by_time");  }
 
     return $server;
   }
@@ -870,7 +809,7 @@
 
 //------------------------------------------------------------------------------------------------------------+
 
-  function lgsl_string_html($string, $xml_feed = FALSE, $word_wrap = 0)
+  function lgsl_string_html($string = "", $xml_feed = FALSE, $word_wrap = 0)
   {
     if ($word_wrap) { $string = lgsl_word_wrap($string, $word_wrap); }
 
@@ -929,11 +868,19 @@
 
 //------------------------------------------------------------------------------------------------------------+
 
+function lgsl_lang($code) { // FOR PREVENTING WARNINGS
+  global $lgsl_config;
+  if (!isset($lgsl_config['text'][$code])) { return "/#LGSL_LANG#{$code}#/"; }
+  return $lgsl_config['text'][$code];
+}
+
+//------------------------------------------------------------------------------------------------------------+
+
   function lgsl_location_link($location)
   {
     if (!$location) { return "#"; }
 
-    return "https://www.google.com/maps/search/{$location}/";
+    return "https://www.google.com/maps/search/{$location}+country/";
   }
 
 //------------------------------------------------------------------------------------------------------------+
@@ -948,7 +895,7 @@
 
     if (long2ip(ip2long($ip)) == "255.255.255.255") { return "XX"; }
 
-    $url = "http://ip-api.com/json/".urlencode($ip)."?fields=countryCode"; // http://api.wipmania.com/
+    $url = "http://ip-api.com/json/".urlencode($ip)."?fields=countryCode";
 
     if (function_exists('curl_init') && function_exists('curl_setopt') && function_exists('curl_exec'))
     {
@@ -1006,6 +953,46 @@
     $lgsl_path = str_replace("\\", "/", $lgsl_path);
 
     return $lgsl_path;
+  }
+
+//------------------------------------------------------------------------------------------------------------+
+
+  function lgsl_build_link_params($url, $params)
+  {
+    // IS NO PARAMS
+
+    if (!strpos($url, '?')) {
+      return "{$url}?" . http_build_query($params);
+    }
+
+    // IS '?' EXISTS
+
+    if (isset($params['game'])) {
+      if (strpos($url, 'game=')) {
+        $url = preg_replace('/game=([\w\d\_\-])+/', "game={$params['game']}", $url);
+      }
+      else {
+        $url .= "&game={$params['game']}";
+      }
+    }
+    if (isset($params['type'])) {
+      if (strpos($url, 'type=')) {
+        $url = preg_replace('/type=([\w\d\_\-])+/', "type={$params['type']}", $url);
+      }
+      else {
+        $url .= "&type={$params['type']}";
+      }
+    }
+    if (isset($params['page'])) {
+      if (strpos($url, 'page=')) {
+        $url = preg_replace('/page=\d+/', "page={$params['page']}", $url);
+      }
+      else {
+        $url .= "&page={$params['page']}";
+      }
+    }
+
+    return $url;
   }
 
 //------------------------------------------------------------------------------------------------------------+
@@ -1085,29 +1072,29 @@
   $cookie = isset($_COOKIE['lgsl_admin_auth']) ? $_COOKIE['lgsl_admin_auth'] : "";
   $lgsl_url_path = lgsl_url_path();
 
-  if (isset($_GET['lgsl_debug']) and $auth == $cookie)
+  if (isset($_GET['lgsl_debug']) and $auth === $cookie)
   {
     echo "<details>
             <summary style='margin-bottom: 12px;'>
               Open debug infos
             </summary>
-            <hr /><pre>".print_r($_SERVER, TRUE)."</pre>
-            <hr />#d0# ".__FILE__."
-            <hr />#d1# ".@realpath(__FILE__)."
-            <hr />#d2# ".dirname(__FILE__)."
-            <hr />#d3# {$lgsl_file_path}
-            <hr />#d4# {$_SERVER['DOCUMENT_ROOT']}
-            <hr />#d5# ".@realpath($_SERVER['DOCUMENT_ROOT'])."
-            <hr />#d6# {$lgsl_url_path}
-            <hr />#c0# {$lgsl_config['url_path']}
-            <hr />#c1# {$lgsl_config['no_realpath']}
-            <hr />#c2# {$lgsl_config['feed']['method']}
-            <hr />#c3# {$lgsl_config['feed']['url']}
-            <hr />#c4# {$lgsl_config['cache_time']}
-            <hr />#c5# {$lgsl_config['live_time']}
-            <hr />#c6# {$lgsl_config['timeout']}
-            <hr />#c7# {$lgsl_config['cms']}
-            <hr />
+            <hr><pre>".print_r($_SERVER, TRUE)."</pre>
+            <hr>#d0# ".__FILE__."
+            <hr>#d1# ".@realpath(__FILE__)."
+            <hr>#d2# ".dirname(__FILE__)."
+            <hr>#d3# {$lgsl_file_path}
+            <hr>#d4# {$_SERVER['DOCUMENT_ROOT']}
+            <hr>#d5# ".@realpath($_SERVER['DOCUMENT_ROOT'])."
+            <hr>#d6# {$lgsl_url_path}
+            <hr>#c0# {$lgsl_config['url_path']}
+            <hr>#c1# {$lgsl_config['no_realpath']}
+            <hr>#c2# {$lgsl_config['feed']['method']}
+            <hr>#c3# {$lgsl_config['feed']['url']}
+            <hr>#c4# {$lgsl_config['cache_time']}
+            <hr>#c5# {$lgsl_config['live_time']}
+            <hr>#c6# {$lgsl_config['timeout']}
+            <hr>#c7# {$lgsl_config['cms']}
+            <hr>
           </details>
           <select onchange='javascript:document.querySelector(\"link[rel=stylesheet]\").href = \"lgsl_files/styles/\" + this.value + \".css\"'>
             <option value='breeze_style'>breeze_style</option>

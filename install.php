@@ -10,21 +10,19 @@
 	$mysql_table = empty($_POST["table"]) ? "lgsl" : $_POST["table"];
 	$installed = "";
 
-	if(isset($_POST["_createtables"])){
-		if(empty($_POST["server"]) || empty($_POST["login"]) || empty($_POST["database"]) || empty($_POST["table"])){
+	if (isset($_POST["_createtables"])){
+		if (empty($_POST["server"]) || empty($_POST["login"]) || empty($_POST["database"]) || empty($_POST["table"])){
 			echo('<l k="filli"></l>');
-		}
-		else {
+		} else {
 			try {
-        mysqli_report(MYSQLI_REPORT_ERROR);
+				mysqli_report(MYSQLI_REPORT_ERROR);
 				$lgsl_database = mysqli_connect($mysql_server, $mysql_user, $mysql_password);
 
 				if (!$lgsl_database) {
 					printf("Connect <span style='color: red;'>failed</span>: wrong mysql server, username or password (%s)\n", mysqli_connect_error());
-				}
-				else {
+				} else {
 					$lgsl_select_db = mysqli_select_db($lgsl_database, $_POST["database"]);
-					if(mysqli_query($lgsl_database, "
+					if (mysqli_query($lgsl_database, "
 						CREATE TABLE `".$_POST["table"]."` (
 
 							`id`         INT     (11)  NOT NULL auto_increment,
@@ -57,50 +55,51 @@
 			}
 		}
 	}
-	if(isset($_GET['test'])){
-    if(function_exists("fsockopen")){
-      $fp = fsockopen("udp://127.0.0.1", 13, $errno, $errstr, 3);
-      if (!$fp) {
-        echo "ERROR: $errno - $errstr<br />\n";
-        echo "<l k='coutd'></l>\n";
-      } else {
-        fwrite($fp, "\n");
-        echo "<l k='consu'></l>\n";
-        fclose($fp);
-      } 
-    }
-    else {
-      echo("FSOCKOPEN: FAILED\n");
-    }
-    
-    if(function_exists("curl_init") && function_exists("curl_setopt") && function_exists("curl_exec")){
-      echo("CURL: SUCCESS\n");
-    }
-    else{
-      echo("CURL: FAILED\n");
-    }
-    
-    if(function_exists("bzdecompress")){
-      echo("BZ2: SUCCESS\n");
-    }
-    else{
-      echo("BZ2: FAILED\n");
-    }
+	if (isset($_GET['test'])) {
+		if (function_exists("fsockopen")) {
+			$fp = fsockopen("udp://127.0.0.1", 13, $errno, $errstr, 3);
+			if (!$fp) {
+				echo "ERROR: $errno - $errstr<br>\n";
+				echo "<l k='coutd'></l>\n";
+			} else {
+				fwrite($fp, "\n");
+				echo "<l k='consu'></l>\n";
+				fclose($fp);
+			}
+		} else {
+			echo("FSOCKOPEN: FAILED\n");
+		}
+
+		if (function_exists("curl_init") && function_exists("curl_setopt") && function_exists("curl_exec")) {
+			echo("CURL: SUCCESS\n");
+		} else {
+			echo("CURL: FAILED\n");
+		}
+
+		if (function_exists("bzdecompress")) {
+			echo("BZ2: SUCCESS\n");
+		} else {
+			echo("BZ2: FAILED\n");
+		}
+
+		if (extension_loaded('gd')) {
+			echo("GD: SUCCESS\n");
+		} else {
+			echo("GD: FAILED\n");
+		}
 	}
 
 ?>
-
-
 <!DOCTYPE html>
 <html>
 	<head>
 		<title>LGSL Installation Page</title>
-		<link rel='stylesheet' type='text/css' href='lgsl_files/styles/darken_style.css' />
+		<link rel='stylesheet' type='text/css' href='lgsl_files/styles/darken_style.css'>
 		<link rel="icon" href="lgsl_files/other/favicon.ico" type="image/x-icon">
 		<link rel="shortcut icon" href="lgsl_files/other/favicon.ico" type="image/x-icon">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
-		<meta http-equiv='content-style-type' content='text/css' />
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+		<meta http-equiv='content-style-type' content='text/css'>
 		<style>
 			body {
 				padding: 2px 4px;
@@ -131,7 +130,7 @@
 				text-decoration: none;
 				border: 1px solid blue;
 				border-radius: 32px;
-				margin-bottom: 0px;
+				margin-bottom: 0;
 				vertical-align: super;
 				padding: 2px 2px 2px 3px;
 				line-height: 6px;
@@ -149,31 +148,31 @@
 //------------------------------------------------------------------------------------------------------------+
 
 	$output = '
-	<h6><a href="./"><l k="back"></l></a> | <a href="?test">Check requirements</a></h6>
+	<h6><a href="./"><l k="back"></l></a> | <a href="?test"><l k="check"></l></a></h6>
 	<h5><a href="https://github.com/tltneon/lgsl/wiki/How-to-install-LGSL" target="_blank"><l k="owiki"></l></a></h5>
 	<h4><l k="step1"></l></h4>
 	<form method="post" action="?">
 		<p>
 			MySQL Server*:
-			<input type="text" name="server" onChange="vars.mysql_server = event.target.value" value="'.$mysql_server.'" '.$installed.' />
+			<input type="text" name="server" onChange="vars.mysql_server = event.target.value" value="'.$mysql_server.'" '.$installed.'>
 		</p>
 		<p>
 			MySQL Login*:
-			<input type="text" name="login" onChange="vars.mysql_user = event.target.value" value="'.$mysql_user.'" '.$installed.' />
+			<input type="text" name="login" onChange="vars.mysql_user = event.target.value" value="'.$mysql_user.'" '.$installed.'>
 		</p>
 		<p>
 			MySQL Password:
-			<input type="password" name="password" onChange="vars.mysql_password = event.target.value" value="'.$mysql_password.'" '.$installed.' />
+			<input type="password" name="password" onChange="vars.mysql_password = event.target.value" value="'.$mysql_password.'" '.$installed.'>
 		</p>
 		<p>
 			MySQL Database*:
-			<input type="text" name="database" onChange="vars.mysql_database = event.target.value" value="'.$mysql_database.'" '.$installed.' />
+			<input type="text" name="database" onChange="vars.mysql_database = event.target.value" value="'.$mysql_database.'" '.$installed.'>
 		</p>
 		<p>
 			MySQL Table*:
-			<input type="text" name="table" onChange="vars.mysql_table = event.target.value" value="'.$mysql_table.'" '.$installed.' />
+			<input type="text" name="table" onChange="vars.mysql_table = event.target.value" value="'.$mysql_table.'" '.$installed.'>
 		</p>
-		<input type="hidden" name="_createtables" value="1" />
+		<input type="hidden" name="_createtables" value="1">
 		<button type="submit" '.$installed.'>
 			<l k="creat"></l>
 		</button>
@@ -181,24 +180,24 @@
 
 	'.($installed == "disabled" ? '<div><l k="cretd"></l></div>' : '').'
 
-	<br />
+	<br>
 
 	<h4><l k="step2"></l></h4>
 
 	<p>
 		LGSL Admin Login*:
-		<input type="text" onChange="vars.lgsl_user = event.target.value" />
+		<input type="text" onChange="vars.lgsl_user = event.target.value">
 	</p>
 	<p>
 		LGSL Admin Password*:
-		<input type="text" onChange="vars.lgsl_password = event.target.value" />
+		<input type="text" onChange="vars.lgsl_password = event.target.value">
 	</p>
 
-	<hr />
+	<hr>
 
 	<p>
 		<l k="selst"></l>:
-		<select type="text" name="style" onChange="changeValue(event, {styleChanged: true})" />
+		<select type="text" name="style" onChange="changeValue(event, {styleChanged: true})">
 			<option value="darken_style.css">Darken</option>
 			<option value="ogp_style.css">OGP</option>
 			<option value="material_style.css">Material Design</option>
@@ -208,12 +207,12 @@
 			<option value="classic_style.css">Classic</option>
 			<option value="disc_ff_style.css">Disc FF</option>
 			<option value="wallpaper_style.css">Wallpaper</option>
-			<option value="showcase">>> Showcase</option>
+			<option value="showcase" style="color: green;">(external) Showcase</option>
 		</select>
 	</p>
 	<p>
 		<l k="sella"></l>:
-		<select type="text" name="language" onChange="changeValue(event, {translationInput: true})" />
+		<select type="text" name="language" onChange="changeValue(event, {translationInput: true})">
 			<option value="english">English</option>
 			<option value="russian">Русский</option>
 			<option value="french">Français</option>
@@ -225,23 +224,25 @@
 			<option value="arabic">اَلْعَرَبِيَّةُ</option>
 			<option value="turkish">Türkçe</option>
 			<option value="korean">한국어</option>
+			<option value="romanian">Română</option>
+			<option value="chinese_simplified">简体中文</option>
 			<option value="help" style="color: green;">!Help to translate LGSL!</option>
 		</select>
 	</p>
 
 	<p>
 		<l k="selsc"></l> <a href="https://github.com/tltneon/lgsl/wiki/scripts" target="_blank" class="hinfolink">?</a>:
-		<br /><input type="checkbox" id="parallax.js" name="scripts" onChange="changeCheckbox(event)" /> parallax (for Parallax Style)
-		<br /><input type="checkbox" id="preview.js" name="scripts" onChange="changeCheckbox(event)" /> map preview (on server list)
-		<br /><input type="checkbox" id="refresh.js" name="scripts" onChange="changeCheckbox(event)" /> refresh (manually refresh server status)
-		<br /><input type="checkbox" id="flag-icon.js" name="scripts" onChange="changeCheckbox(event)" /> flag-icon (replacing with svg)
+		<br><input type="checkbox" id="parallax.js" name="scripts" onChange="changeCheckbox(event)"> parallax (for Parallax Style)
+		<br><input type="checkbox" id="preview.js" name="scripts" onChange="changeCheckbox(event)"> map preview (on server list)
+		<br><input type="checkbox" id="refresh.js" name="scripts" onChange="changeCheckbox(event)"> refresh (manually refresh server status)
+		<br><input type="checkbox" id="flag-icon.js" name="scripts" onChange="changeCheckbox(event)"> flag-icon (replacing with svg)
 	</p>
 
-	<hr />
+	<hr>
 
 	<p>
 		<l k="sorts"></l>:
-		<select type="text" name="sort_servers_by" onChange="changeValue(event)" />
+		<select type="text" name="sort_servers_by" onChange="changeValue(event)">
 			<option value="id">ID</option>
 			<option value="type">Type</option>
 			<option value="zone">Zone</option>
@@ -251,7 +252,7 @@
 	</p>
 	<p>
 		<l k="sortp"></l>:
-		<select type="text" name="sort_players_by" onChange="changeValue(event)" />
+		<select type="text" name="sort_players_by" onChange="changeValue(event)">
 			<option value="name">Name</option>
 			<option value="score">Score</option>
 			<option value="time">Time</option>
@@ -259,32 +260,36 @@
 	</p>
 	<p>
 		<l k="enaim"></l> <a href="https://github.com/tltneon/lgsl/wiki/LGSL-with-Image-Mod" target="_blank" class="hinfolink">?</a>:
-		<input type="checkbox" name="image_mod" onChange="changeCheckbox(event)" />
+		<input type="checkbox" name="image_mod" onChange="changeCheckbox(event)">
+	</p>
+	<p>
+		Enable Preloader <a href="https://github.com/tltneon/lgsl/wiki/features#preloader" target="_blank" class="hinfolink">?</a>:
+		<input type="checkbox" name="preloader" onChange="changeCheckbox(event)">
 	</p>
 	<p>
 		Enable Pagination <a href="https://github.com/tltneon/lgsl/wiki/features#pagination" target="_blank" class="hinfolink">?</a>:
-		<input type="checkbox" name="page_mod" onChange="changeCheckbox(event)" />
-		<input type="number" min="5" max="35" value="15" onChange="vars.page_lim = event.target.value" />
+		<input type="checkbox" name="page_mod" onChange="changeCheckbox(event)">
+		<input type="number" min="5" max="35" value="15" onChange="vars.page_lim = event.target.value">
 	</p>
 	<p>
 		Automatically reload page:
-		<input type="checkbox" name="autoreload" onChange="changeCheckbox(event)" />
+		<input type="checkbox" name="autoreload" onChange="changeCheckbox(event)">
 	</p>
 	<p>
 		Time before a server needs updating:
-		<input type="number" min="0" max="3600" value="60" onChange="vars.cache_time = event.target.value" />
+		<input type="number" min="0" max="3600" value="60" onChange="vars.cache_time = event.target.value">
 	</p>
 	<p>
 		Enable server tracking (history) <a href="https://github.com/tltneon/lgsl/wiki/features#pagination" target="_blank" class="hinfolink">?</a>:
-		<input type="checkbox" name="history" onChange="changeCheckbox(event)" />
+		<input type="checkbox" name="history" onChange="changeCheckbox(event)">
 	</p>
 	<p>
 		<l k="hideo"></l>:
-		<input type="checkbox" name="hide_offline" onChange="changeCheckbox(event)" />
+		<input type="checkbox" name="hide_offline" onChange="changeCheckbox(event)">
 	</p>
 	<p>
 		<l k="pubad"></l>:
-		<select type="text" name="public_add" onChange="changeValue(event)" />
+		<select type="text" name="public_add" onChange="changeValue(event)">
 			<option value="0" style="color: red;">Disabled</option>
 			<option value="1" style="color: orange;">Enabled (require approval)</option>
 			<option value="2" style="color: green;">Enabled (shows instantly)</option>
@@ -292,11 +297,11 @@
 	</p>
 	<p>
 		<l k="showt"></l>:
-		<input type="checkbox" name="totals" onChange="changeCheckbox(event)" />
+		<input type="checkbox" name="totals" onChange="changeCheckbox(event)">
 	</p>
 	<p>
 		<l k="showl"></l>:
-		<select type="text" name="locations" onChange="changeValue(event)" />
+		<select type="text" name="locations" onChange="changeValue(event)">
 			<option value="0" style="color: red;">Disabled</option>
 			<option value="1" style="color: green;">Enabled</option>
 			<option disabled style="background: gray;"></option>
@@ -310,7 +315,7 @@
 	</button>
 
 	<p style="color: red; font-size: 12pt;"><l k="remem"></l></p>
-	<hr />
+	<hr>
 	<p style="font-size: 9pt;"><l k="after"></l></p>
 	';
 
@@ -320,8 +325,6 @@
 ?>
 			</div>
 		</div>
-	</body>
-</html>
 
 <script>
 document.addEventListener("DOMContentLoaded", reloadLocale);
@@ -357,7 +360,8 @@ document.addEventListener("reloadLocale", reloadLocale);
 		hide_offline: false,
 		public_add: false,
 		totals: false,
-		locations: false
+		locations: false,
+    	preloader: false
 	}
 	function changeValue(event, options = {}) {
 		console.log(event);
@@ -366,7 +370,11 @@ document.addEventListener("reloadLocale", reloadLocale);
 				event.target.value = "darken_style.css";
 				window.open("https://github.com/tltneon/lgsl/wiki/Styles");
 			}
-			document.getElementsByTagName("link")[0].href = href='lgsl_files/styles/'+event.target.value;
+			if(event.target.value == "parallax_style.css"){
+				vars["scripts"]["parallax.js"] = true;
+				document.querySelector("input[id='parallax.js']").checked = true;
+			}
+			document.getElementsByTagName("link")[0].href = `lgsl_files/styles/${event.target.value}`;
 		}
 		if(options.translationInput){
 			if(event.target.value == "help"){
@@ -463,23 +471,25 @@ document.addEventListener("reloadLocale", reloadLocale);
 		"$lgsl_config['db']['db']      = \""+ vars.mysql_database +"\"; \n" +
 		"$lgsl_config['db']['table']   = \""+ vars.mysql_table +"\"; \n" +
 		"$lgsl_config['image_mod']     = "+ vars.image_mod +"; \n" +
-		"$lgsl_config['pagination_mod']= "+ vars.page_mod +";   // true = using pagination\n" +
-		"$lgsl_config['pagination_lim']= "+ vars.page_lim +";   // limit per page\n" +
-		"$lgsl_config['direct_index']  = 0;                     // 1=link to index.php instead of the folder \n" +
-		"$lgsl_config['no_realpath']   = 0;                     // 1=do not use the realpath function \n" +
-		"$lgsl_config['url_path']      = \"\";                  // full url to /lgsl_files/ for when auto detection fails \n" +
-		"$lgsl_config['management']    = 0;                     // 1=show advanced management in the admin by default \n" +
-		"$lgsl_config['host_to_ip']    = 0;                     // 1=show the servers ip instead of its hostname \n" +
-		"$lgsl_config['public_add']    = "+ vars.public_add +"; // 1=servers require approval OR 2=servers shown instantly \n" +
-		"$lgsl_config['public_feed']   = 0;                     // 1=feed requests can add new servers to your list \n" +
-		"$lgsl_config['cache_time']    = "+ vars.cache_time +"; // seconds=time before a server needs updating \n" +
-		"$lgsl_config['autoreload']    = "+ vars.autoreload +"; // 1=reloads page when cache_time is passed \n" +
-		"$lgsl_config['history']       = "+ vars.history +";    // 1=reloads page when cache_time is passed \n" +
-		"$lgsl_config['live_time']     = 3;                     // seconds=time allowed for updating servers per page load \n" +
-		"$lgsl_config['timeout']       = 0;                     // 1=gives more time for servers to respond but adds loading delay \n" +
-		"$lgsl_config['retry_offline'] = 0;                     // 1=repeats query when there is no response but adds loading delay \n" +
-		"$lgsl_config['cms']           = \"sa\";                // sets which CMS specific code to use \n" +
-		"include(\"languages/"+ vars.language +".php\");        // sets LGSL language";
+		"$lgsl_config['preloader']     = "+ vars.preloader +";   // true=using ajax to faster loading page\n" +
+		"$lgsl_config['disabled_types'] = false;                 // allow to exclude some protocols (games) from list. usage: $lgsl_config['disabled_types']= array('warsowold', 'halflifewon', 'test');\n" +
+		"$lgsl_config['pagination_mod'] = "+ vars.page_mod +";   // true = using pagination\n" +
+		"$lgsl_config['pagination_lim'] = "+ vars.page_lim +";   // limit per page\n" +
+		"$lgsl_config['direct_index']   = 0;                     // 1=link to index.php instead of the folder \n" +
+		"$lgsl_config['no_realpath']    = 0;                     // 1=do not use the realpath function \n" +
+		"$lgsl_config['url_path']       = \"\";                  // full url to /lgsl_files/ for when auto detection fails \n" +
+		"$lgsl_config['management']     = 0;                     // 1=show advanced management in the admin by default \n" +
+		"$lgsl_config['host_to_ip']     = 0;                     // 1=show the servers ip instead of its hostname \n" +
+		"$lgsl_config['public_add']     = "+ vars.public_add +"; // 1=servers require approval OR 2=servers shown instantly \n" +
+		"$lgsl_config['public_feed']    = 0;                     // 1=feed requests can add new servers to your list \n" +
+		"$lgsl_config['cache_time']     = "+ vars.cache_time +"; // seconds=time before a server needs updating \n" +
+		"$lgsl_config['autoreload']     = "+ vars.autoreload +"; // 1=reloads page when cache_time is passed \n" +
+		"$lgsl_config['history']        = "+ vars.history +";    // 1=reloads page when cache_time is passed \n" +
+		"$lgsl_config['live_time']      = 3;                     // seconds=time allowed for updating servers per page load \n" +
+		"$lgsl_config['timeout']        = 0;                     // 1=gives more time for servers to respond but adds loading delay \n" +
+		"$lgsl_config['retry_offline']  = 0;                     // 1=repeats query when there is no response but adds loading delay \n" +
+		"$lgsl_config['cms']            = \"sa\";                // sets which CMS specific code to use \n" +
+		"include(\"languages/"+ vars.language +".php\");         // sets LGSL language";
 		textarea.style.width = "100%";
 		textarea.style.height = "90vh";
 		window.scrollTo(0, document.body.scrollHeight);
@@ -514,6 +524,7 @@ document.addEventListener("reloadLocale", reloadLocale);
 				"mysld": "Connect <span style='color: red;'>failed</span>: mysqli extension doesn't active.",
 				"table": "LGSL <span style='color: red;'>table wasn't created</span>: wrong database name or table already exists.",
 				"cretd": "Table <span style='color: green;'>successfully</span> created! Get to Step 2.",
+				"check": "Check requirements",
 			},
 			"russian": {
 				"tablc": "LGSL table created <span style='color: green;'>successfully</span>.",
@@ -542,6 +553,7 @@ document.addEventListener("reloadLocale", reloadLocale);
 				"mysld": "Connect <span style='color: red;'>failed</span>: mysqli extension doesn't active.",
 				"table": "LGSL <span style='color: red;'>table wasn't created</span>: wrong database name or table already exists.",
 				"cretd": "Table <span style='color: green;'>successfully</span> created! Get to Step 2.",
+				"check": "Check requirements",
 			},
 			"french": {
 				"tablc": "LGSL table created <span style='color: green;'>successfully</span>.",
@@ -570,6 +582,7 @@ document.addEventListener("reloadLocale", reloadLocale);
 				"mysld": "Connect <span style='color: red;'>failed</span>: mysqli extension doesn't active.",
 				"table": "LGSL <span style='color: red;'>table wasn't created</span>: wrong database name or table already exists.",
 				"cretd": "Table <span style='color: green;'>successfully</span> created! Get to Step 2.",
+				"check": "Check requirements",
 			},
 			"german": {
 				"tablc": "LGSL table created <span style='color: green;'>successfully</span>.",
@@ -598,6 +611,7 @@ document.addEventListener("reloadLocale", reloadLocale);
 				"mysld": "Connect <span style='color: red;'>failed</span>: mysqli extension doesn't active.",
 				"table": "LGSL <span style='color: red;'>table wasn't created</span>: wrong database name or table already exists.",
 				"cretd": "Table <span style='color: green;'>successfully</span> created! Get to Step 2.",
+				"check": "Check requirements",
 			},
 			"spanish": {
 				"tablc": "LGSL table created <span style='color: green;'>successfully</span>.",
@@ -626,6 +640,7 @@ document.addEventListener("reloadLocale", reloadLocale);
 				"mysld": "Connect <span style='color: red;'>failed</span>: mysqli extension doesn't active.",
 				"table": "LGSL <span style='color: red;'>table wasn't created</span>: wrong database name or table already exists.",
 				"cretd": "Table <span style='color: green;'>successfully</span> created! Get to Step 2.",
+				"check": "Check requirements",
 			},
 			"czech": {
 				"tablc": "LGSL table created <span style='color: green;'>successfully</span>.",
@@ -654,6 +669,7 @@ document.addEventListener("reloadLocale", reloadLocale);
 				"mysld": "Connect <span style='color: red;'>failed</span>: mysqli extension doesn't active.",
 				"table": "LGSL <span style='color: red;'>table wasn't created</span>: wrong database name or table already exists.",
 				"cretd": "Table <span style='color: green;'>successfully</span> created! Get to Step 2.",
+				"check": "Check requirements",
 			},
 			"bulgarian": {
 				"tablc": "LGSL table created <span style='color: green;'>successfully</span>.",
@@ -682,6 +698,7 @@ document.addEventListener("reloadLocale", reloadLocale);
 				"mysld": "Connect <span style='color: red;'>failed</span>: mysqli extension doesn't active.",
 				"table": "LGSL <span style='color: red;'>table wasn't created</span>: wrong database name or table already exists.",
 				"cretd": "Table <span style='color: green;'>successfully</span> created! Get to Step 2.",
+				"check": "Check requirements",
 			},
 			"slovak": {
 				"tablc": "LGSL tabuľka bola vytvorená <span style='color: green;'>úspešne</span>.",
@@ -710,6 +727,7 @@ document.addEventListener("reloadLocale", reloadLocale);
 				"mysld": "Pripojenie <span style='color: red;'>Zlyhalo</span>: PHP rozšírenie mysqli nie je aktívne.",
 				"table": "LGSL <span style='color: red;'>tabulka nebola vytvorená</span>: nesprávny názov databázy alebo tabuľka už existuje.",
 				"cretd": "Table <span style='color: green;'>successfully</span> created! Get to Step 2.",
+				"check": "Check requirements",
 			},
 			"arabic": {
 				"tablc": "LGSL table created <span style='color: green;'>successfully</span>.",
@@ -738,6 +756,7 @@ document.addEventListener("reloadLocale", reloadLocale);
 				"mysld": "Connect <span style='color: red;'>failed</span>: mysqli extension doesn't active.",
 				"table": "LGSL <span style='color: red;'>table wasn't created</span>: wrong database name or table already exists.",
 				"cretd": "Table <span style='color: green;'>successfully</span> created! Get to Step 2.",
+				"check": "Check requirements",
 			},
 			"turkish": {
 				"tablc": "LGSL tablosu oluşturuldu <span style='color: green;'>Başarıyla Tamamlandı!</span>.",
@@ -766,6 +785,36 @@ document.addEventListener("reloadLocale", reloadLocale);
 				"mysld": "Bağlantı <span style='color: red;'>failed</span>: Hatalı <span style='color: red;'>Bağlantı Başarısız</span>: mysqli uzantısı etkin değil.",
 				"table": "LGSL <span style='color: red;'>tablo oluşturulmadı</span>: yanlış veritabanı adı veya tablo zaten var.",
 				"cretd": "Tablo <span style='color: green;'>Başarıyla Oluşturuldu!</span> Oluşturuldu! 2'inci adıma geçin",
+				"check": "Check requirements",
+			},
+			"romanian": {
+				"tablc": "Tabelul LGSL a fost creat cu <span style='color: green;'>success</span>.",
+				"filli": "Trebuie să completezi câmpurile (<span style='color:red'>pasul 1</span>) corect.",
+				"consu": "Conexiunea a fost stabilită cu <span style='color: green;'>succes</span>, LGSL poate prelua date de la serverele de jocuri.",
+				"coutd": "LGSL <span style='color: red;'>nu a putut prelua date de la majoritatea serverelor de jocuri</span> deoarece traficul UDP este blocat pe găzduirea dvs.",
+				"remem": "Nu uitați să eliminați install.php după instalarea LGSL!",
+				"after": "După ce finalizați configurația, înlocuiți-o în lgsl_files/lgsl_config.php",
+				"selst": "Selectați stilul",
+				"sella": "Selectați limba",
+				"selsc": "Selectați scripturi",
+				"sorts": "Sortați serverele după",
+				"sortp": "Sortați jucătorii după",
+				"enaim": "Activați modul pentru imagine status server",
+				"hideo": "Ascunde serverele offline",
+				"pubad": "Oricine poate adăuga servere",
+				"showt": "Afișați totalurile",
+				"showl": "Afișați locațiile",
+				"step1": "Pasul 1: Inițializați tabelele LGSL",
+				"step2": "Pasul 2: Configurare LGSL",
+				"back": "< Înapoi",
+				"owiki": "Wiki online: Cum să",
+				"gener": "Generați configurația",
+				"creat": "Creați un tabel",
+				"filla": "Trebuie să completați câmpurile necesare* (pasul 1 sau 2).",
+				"mysld": "Conectarea a <span style='color: red;'>eșuat</span>: extensia mysqli nu este activă.",
+				"table": "<span style='color: red;'>Tabelul LGSL nu a fost creat</span>: nume greșit al bazei de date sau tabelul există deja.",
+				"cretd": "Tabel creat cu <span style='color: green;'>succes</span> created! Continuați cu Pasul 2.",
+				"check": "Verificați cerințele",
 			},
 			"korean": {
 				"tablc": "LGSL 테이블이<span style='color: green;'>완료되었습니다!</span>를 만들었습니다.",
@@ -794,8 +843,41 @@ document.addEventListener("reloadLocale", reloadLocale);
 				"mysld": "링크 <span style='color: red;'>실패</span>: 잘못된 <span style='color: red;'>연결 실패</span>: mysqli 확장이 활성화되어 있지 않습니다.",
 				"table": "LGSL <span style='color: red;'>테이블이 생성되지 않음</span>: 잘못된 데이터베이스 이름 또는 테이블이 이미 존재합니다.",
 				"cretd": "<span style='color: green;'>성공적으로 생성되었습니다!</span> 테이블이 생성되었습니다! 2단계로 이동",
+				"check": "Check requirements",
 			},
-		}
+			"chinese_simplified": {
+				"tablc": "LGSL 数据表创建 <span style='color: green;'>成功</span>.",
+				"filli": "您必须确保必填项 (<span style='color:red'>步骤1</span>) 正确.",
+				"consu": "连接 <span style='color: green;'>成功</span> 确认, LGSL 可以从游戏服务器获取数据。",
+				"coutd": "LGSL <span style='color: red;'>无法从大多数游戏服务器获取数据</span> ，因为UDP upflow在您的当前服务器主机上被阻止。",
+				"remem": "请务必在LGSL安装成功删除install.php",
+				"after": "接下来, 请将它替换到 lgsl_files/lgsl_config.php",
+				"selst": "选择风格",
+				"sella": "选择语言",
+				"selsc": "选择脚本",
+				"sorts": "服务器排序方式",
+				"sortp": "玩家排序方式",
+				"enaim": "开启图片mod",
+				"hideo": "隐藏离线服务器",
+				"pubad": "开放服务器添加",
+				"showt": "显示总数",
+				"showl": "显示位置",
+				"step1": "步骤1: 安装LGSL数据表",
+				"step2": "步骤2: 配置LGSL",
+				"back": "< 返回",
+				"owiki": "在线文档: 访问",
+				"gener": "生成配置文件",
+				"creat": "创建数据表",
+				"filla": "您必须完成必填项* (步骤1或步骤2).",
+				"mysld": "连接 <span style='color: red;'>失败</span>: mysqli扩展未激活。",
+				"table": "LGSL <span style='color: red;'>数据表未创建</span>: 数据库名称有误或数据表已被创建。",
+				"cretd": "数据表 <span style='color: green;'>成功</span> 创建! 请进入第2步。",
+				"check": "检查依赖",
+			}
+		};
 		return t[locale][key];
 	}
 </script>
+
+	</body>
+</html>

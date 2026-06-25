@@ -52,6 +52,8 @@
   $lgsl_config['text']['tea'] = "Takım";
   $lgsl_config['text']['cou'] = "Ülke";
   $lgsl_config['text']['pin'] = "Gecikme";
+  $lgsl_config['text']['dea'] = "Deaths";
+  $lgsl_config['text']['hea'] = "Health";
   $lgsl_config['text']['pag'] = "Sayfa";
   $lgsl_config['text']['bak'] = "SUNUCU LİSTESİNE GERİ DÖN";
   $lgsl_config['text']['mpg'] = "ANA SAYFA'YA DÖN";
@@ -72,7 +74,7 @@
   $lgsl_config['text']['dsb'] = "Devre Dışı";
   $lgsl_config['text']['aum'] = "YÖNETİCİ KULLANICI ADI VEYA ŞİFRE YAPILANDIRMADAN EKSİK";
   $lgsl_config['text']['apc'] = "LÜTFEN VARSAYILAN ŞİFRENİZİ DEĞİŞTİRİNİZ";
-  $lgsl_config['text']['faq'] = "- Bir sunucuyu kaldırmak için IP'yi silin ve ardından Kaydet'e tıklayın.<br /><br />- LGSL'nin sizin için doldurmaya çalışması için sorgu bağlantı noktasını boş bırakın.<br /><br />- Yazılım portu sadece birkaç oyun için gereklidir, bu nedenle 0 olarak ayarlanması normaldir.<br /><br />- Stili ve diğer seçenekleri ayarlamak için lgsl_config.php dosyasını düzenleyin.<br /><br />- LGSL'nizi güncel tutun.";
+  $lgsl_config['text']['faq'] = "- Bir sunucuyu kaldırmak için IP'yi silin ve ardından Kaydet'e tıklayın.<br><br>- LGSL'nin sizin için doldurmaya çalışması için sorgu bağlantı noktasını boş bırakın.<br><br>- Yazılım portu sadece birkaç oyun için gereklidir, bu nedenle 0 olarak ayarlanması normaldir.<br><br>- Stili ve diğer seçenekleri ayarlamak için lgsl_config.php dosyasını düzenleyin.<br><br>- LGSL'nizi güncel tutun.";
   $lgsl_config['text']['fso'] = "Sunucuların doğrudan sorgulanması için gerekli";
   $lgsl_config['text']['crl'] = "fsockopen devre dışı bırakıldığında besleme için kullanılır";
   $lgsl_config['text']['mbs'] = "UTF-8 sunucu ve oyuncu adlarını doğru göstermek için kullanılır";

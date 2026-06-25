@@ -52,6 +52,8 @@
   $lgsl_config['text']['tea'] = "Team";
   $lgsl_config['text']['cou'] = "Country";
   $lgsl_config['text']['pin'] = "Ping";
+  $lgsl_config['text']['dea'] = "Deaths";
+  $lgsl_config['text']['hea'] = "Health";
   $lgsl_config['text']['pag'] = "Page";
   $lgsl_config['text']['bak'] = "رجوع إلى قائمة الخوادم";
   $lgsl_config['text']['mpg'] = "إلى الصفحة الرئيسية";
@@ -72,7 +74,7 @@
   $lgsl_config['text']['dsb'] = "معطل";
   $lgsl_config['text']['aum'] = "اسم المستخدم أو كلمة المرور للمشرف مفقود من التكوين";
   $lgsl_config['text']['apc'] = "يجب تغيير كلمة مرور المشرف من الافتراضي";
-  $lgsl_config['text']['faq'] = "- To remove a server, delete the IP, then click Save.<br /><br />- Leave the query port blank to have LGSL try to fill it in for you.<br /><br />- Software port is only needed for a few games so it being set 0 is normal.<br /><br />- Edit the lgsl_config.php to set the style and other options.<br /><br />- Keep your LGSL up to date.";
+  $lgsl_config['text']['faq'] = "- To remove a server, delete the IP, then click Save.<br><br>- Leave the query port blank to have LGSL try to fill it in for you.<br><br>- Software port is only needed for a few games so it being set 0 is normal.<br><br>- Edit the lgsl_config.php to set the style and other options.<br><br>- Keep your LGSL up to date.";
   $lgsl_config['text']['fso'] = "Required for direct querying of servers";
   $lgsl_config['text']['crl'] = "Used for the feed when fsockopen is disabled";
   $lgsl_config['text']['mbs'] = "Used to show UTF-8 server and player names correctly";

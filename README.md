@@ -1,19 +1,24 @@
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/tltneon/lgsl?color=green&style=for-the-badge)](https://github.com/tltneon/lgsl/releases)
-![PHP](https://img.shields.io/badge/PHP-5.4--8.1.0-brightgreen?style=for-the-badge&logo=php)
-![MySQL](https://img.shields.io/badge/MySQL-5.5.27--8.0.x-brightgreen?style=for-the-badge&logo=mysql)
-![MariaDB](https://img.shields.io/badge/MariaDB-5.5--10.6.x-brightgreen?style=for-the-badge&logo=mariadb)
+![PHP](https://img.shields.io/badge/PHP-5.4+-brightgreen?style=for-the-badge&logo=php)
+![MySQL](https://img.shields.io/badge/MySQL-5.5+-brightgreen?style=for-the-badge&logo=mysql)
+![MariaDB](https://img.shields.io/badge/MariaDB-5.5+-brightgreen?style=for-the-badge&logo=mariadb)
 
 [![GitHub followers](https://img.shields.io/github/followers/tltneon?style=for-the-badge)](https://github.com/tltneon?tab=followers)
 [![GitHub stars](https://img.shields.io/github/stars/tltneon/lgsl?style=for-the-badge)](https://github.com/tltneon/lgsl/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/tltneon/lgsl?style=for-the-badge)](https://github.com/tltneon/lgsl/fork)
 [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/tltneon/lgsl?style=for-the-badge)](https://github.com/tltneon/lgsl/archive/master.zip)
 [![Packagist](https://img.shields.io/packagist/l/tltneon/lgsl?style=for-the-badge)](https://github.com/tltneon/lgsl/blob/master/LICENSE)
-# LGSL v6.1.0 (Live Game Server List)
-Based-off LGSL v5.8 (stand-alone version) from www.greycube.com. This is almost original version of LGSL with [new features](https://github.com/tltneon/lgsl#changelog) and working on PHP 5.4-8.x and MySQL 5.5.27-8.0.x or MariaDB 5.5-10.6.x. May be upgraded from LGSL 5.8 and older.
+# LGSL v6.2.1 (Live Game Server List)
+Based-off LGSL v5.8 (stand-alone version) from www.greycube.com.
 
-## [Live Demos](http://lgsl-demo.freesite.vip/) | [Wiki](https://github.com/tltneon/lgsl/wiki) | [How to install]( https://github.com/tltneon/lgsl/wiki/How-to-install-LGSL) | [Supported games](https://github.com/tltneon/lgsl/wiki/Supported-Games,-Query-protocols,-Default-ports) | [Custom styles](https://github.com/tltneon/lgsl/wiki/Styles)
+This is almost original version of LGSL with [new features](https://github.com/tltneon/lgsl#changelog) and working on PHP 5.4+ and MySQL 5.5+ or MariaDB 5.5+.
+LGSL v6 is LTS version, if you want to try new features - see [LGSL7 branch](https://github.com/tltneon/lgsl/tree/lgsl7).
 
-Feel free to make [pull request](https://github.com/tltneon/lgsl) with your custom styles or languages! Also you can suggest any [features](https://github.com/tltneon/lgsl/issues).
+May be easily upgraded from LGSL 5.8 and older.
+
+## [Live DEMOs](https://github.com/tltneon/lgsl/wiki/Who-uses-LGSL) | [How to install]( https://github.com/tltneon/lgsl/wiki/How-to-install-LGSL) | [Supported games](https://github.com/tltneon/lgsl/wiki/Supported-Games,-Query-protocols,-Default-ports) | [Features list](https://github.com/tltneon/lgsl/wiki/features) | [Wiki](https://github.com/tltneon/lgsl/wiki)
+
+Feel free to make [pull request](https://github.com/tltneon/lgsl)! Also you can suggest any [ideas about new features](https://github.com/tltneon/lgsl/issues).
 
 ### Server List on laptop
 ![lgsl Server List on laptop](https://i.imgur.com/oU2x9Y5.png)
@@ -21,6 +26,30 @@ Feel free to make [pull request](https://github.com/tltneon/lgsl) with your cust
 ![lgsl Server List on mobile device](https://i.imgur.com/oui8Nya.png)
 
 ## [Changelog](https://github.com/tltneon/lgsl/wiki/Changelog)
+#### v6.2.1
+- **Added Euro Truck Simulator 2, American Truck Simulator, Mumble, ECO, Cryofall, GTA / Mafia Connected, Sonic Robo Blast 2 support**
+- **Minor fixes**
+#### v6.2.0
+- **Added Preloader feature**
+	- *Loading animation by (https://codepen.io/Bilal1909)*
+- **Added Factorio, Black Ops 3, S.T.A.L.K.E.R. COP, Mafia 2: MP, Just Cause 2: MP support**
+- **Added Satisfactory, World of Warcraft, Farming Simulator support (only online-offline status)**
+- **Fixed FiveM, Battlefield 3, TeamSpeak3/TeaSpeak, Minecraft protocols**
+- **New game icons**
+- **Userbar & Charts improvements**
+- **Romanian language**
+	- *Thanks to [@BaxAndrei](https://github.com/BaxAndrei)*
+- **Chinese simplified language**
+	- *Thanks to [@malimaliao](https://github.com/malimaliao)*
+- **Minor fixes**
+- * Tested on PHP 8.2.0-dev
+#### v6.1.1
+- **Userbar & Charts improvements**
+- **Added Terraria, TeaSpeak support**
+- **New game icons**
+- **Turkish and Korean languages**
+	- *Thanks to [@IGNRexI](https://github.com/IGNRexI)*
+- **Minor fixes**
 #### v6.1.0
 - **LGSL now has native history chart: records server status and players count at last 24 hours**
 - **Available Flag-icon script: replacing standard icons to svg from flag-icon-css**
@@ -30,7 +59,7 @@ Feel free to make [pull request](https://github.com/tltneon/lgsl) with your cust
 - **Minor fixes**
 - * Tested on PHP 8.1.0-dev
 #### v6.0.1
-- **New Style: Cards** [[Live Demo](http://lgsl-demo.freesite.vip/lgsl9/index.php)]
+- **New Style: Cards** [[Screenshots](https://github.com/tltneon/lgsl/wiki/Styles#cards-style)]
 - **Selecting active scripts on install page**
 - **Available Map Preview script**
 - **New game icons**
@@ -56,13 +85,13 @@ Feel free to make [pull request](https://github.com/tltneon/lgsl) with your cust
 #### v5.10.2
 - **LGSL now with IMG Mod!**
 	- *Author playzone46@yandex.ru*
-- **Added Material Style** [[Live Demo](http://lgsl-demo.freesite.vip/lgsl6/index.php)]
+- **Added Material Style** [[Screenshots](https://github.com/tltneon/lgsl/wiki/Styles#material-design-style)]
 - **Improvements to all styles**
 - **Better installation page with various settings**
 - **Rewrited main info table**
 - **Default icons now has bigger resolution**
 	- *Now you can use bigger map images*
-- **Added Wallpaper Style** [[Live Demo](http://lgsl-demo.freesite.vip/lgsl8/index.php)]
+- **Added Wallpaper Style** [[Screenshots](https://github.com/tltneon/lgsl/wiki/Styles#wallpaper-style)]
 #### v5.10.1
 - **Menu in the top of page** (_also now you can enter the admin page thru the clicking on top right corner of the page_)
 - **Further adaptiveness to different resolutions**
